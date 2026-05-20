@@ -1,36 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export default function Home() {
   const [query, setQuery] = useState("");
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
-
-  // 🌐 구글 번역 스크립트 로드 및 실행
-  useEffect(() => {
-    // 이미 스크립트가 로드되어 있지 않은 경우에만 스크립트 태그 생성
-    if (!document.getElementById("google-translate-script")) {
-      const addScript = document.createElement("script");
-      addScript.id = "google-translate-script";
-      addScript.src =
-        "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
-      addScript.async = true;
-      document.body.appendChild(addScript);
-
-      // 구글 번역 초기화 글로벌 함수 등록
-      window.googleTranslateElementInit = () => {
-        new window.google.translate.TranslateElement(
-          {
-            pageLanguage: "ko", // 기본 페이지 언어는 한국어
-            layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
-            autoDisplay: false,
-          },
-          "google_translate_element"
-        );
-      };
-    }
-  }, []);
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -52,47 +27,68 @@ export default function Home() {
     }
   };
 
+  // 🦜 네이버 파파고 새 탭으로 열기 함수
+  const openPapago = () => {
+    window.open("https://papago.naver.com/", "_blank", "noopener,noreferrer");
+  };
+
   return (
     <div style={{ position: "relative", zIndex: 1 }}>
-      
-      {/* 🌐 번역 버튼 영역 (히어로 상단 우측 배치) */}
-      <div 
-        style={{ 
-          display: "flex", 
-          justifyContent: "flex-end", 
-          alignItems: "center", 
-          gap: "10px",
-          padding: "10px 0",
-          position: "relative",
-          zIndex: 100
-        }}
-      >
-        <span style={{ fontSize: "12px", color: "#666", fontWeight: "600" }}>🌐 다국어 번역 / Translation :</span>
-        <div id="google_translate_element" className="translate-box"></div>
-      </div>
-
       {/* 🚀 히어로 영역 */}
-      <div className="hero" style={{ marginTop: "10px" }}>
+      <div className="hero">
         <h1 className="title" style={{ fontSize: "60px", fontWeight: "800" }}>
           Dealounge
         </h1>
         <p className="subtitle">원하는 상품을 검색하고 최저가를 찾아보세요!</p>
 
+        {/* 🔍 검색 및 번역 컨테이너 */}
         <form onSubmit={handleSearch} className="search-container">
-          <div className="search-box">
-            <input
-              type="text"
-              placeholder="무엇을 찾으시나요?"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
+          <div style={{ display: "flex", gap: "10px", width: "100%", alignItems: "center" }}>
+            
+            {/* 기존 검색창 영역 */}
+            <div className="search-box" style={{ flexGrow: 1 }}>
+              <input
+                type="text"
+                placeholder="무엇을 찾으시나요? (영문 검색 시 정확도가 높습니다)"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+              />
+              <button
+                type="submit"
+                className="btn-search"
+                style={{ cursor: "pointer" }}
+              >
+                {loading ? "검색 중..." : "검색"}
+              </button>
+            </div>
+
+            {/* 🦜 파파고 번역 이동 버튼 */}
             <button
-              type="submit"
-              className="btn-search"
-              style={{ cursor: "pointer" }}
+              type="button"
+              onClick={openPapago}
+              style={{
+                height: "50px",
+                padding: "0 20px",
+                background: "#00c73c", // 파파고 시그니처 그린 컬러
+                color: "#fff",
+                borderRadius: "30px",
+                border: "none",
+                fontSize: "14px",
+                fontWeight: "bold",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                boxShadow: "0 4px 10px rgba(0,199,60,0.2)",
+                transition: "0.2s",
+                whiteSpace: "nowrap"
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "#00b334")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "#00c73c")}
             >
-              {loading ? "검색 중..." : "검색"}
+              🦜 Papago 번역
             </button>
+
           </div>
         </form>
       </div>
@@ -175,7 +171,6 @@ export default function Home() {
                   onClick={() => {
                     let targetLink = product.link;
 
-                    // 주소 앞에 http나 https가 없으면 붙여주는 안전장치
                     if (
                       targetLink &&
                       !targetLink.startsWith("http://") &&
@@ -184,7 +179,6 @@ export default function Home() {
                       targetLink = `https:${targetLink}`;
                     }
 
-                    // 새 탭으로 강제 이동 유도
                     if (targetLink) {
                       window.open(targetLink, "_blank", "noopener,noreferrer");
                     } else {
