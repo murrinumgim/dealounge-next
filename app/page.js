@@ -1,11 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Home() {
   const [query, setQuery] = useState("");
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  // 🌐 구글 번역 스크립트 로드 및 실행
+  useEffect(() => {
+    // 이미 스크립트가 로드되어 있지 않은 경우에만 스크립트 태그 생성
+    if (!document.getElementById("google-translate-script")) {
+      const addScript = document.createElement("script");
+      addScript.id = "google-translate-script";
+      addScript.src =
+        "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+      addScript.async = true;
+      document.body.appendChild(addScript);
+
+      // 구글 번역 초기화 글로벌 함수 등록
+      window.googleTranslateElementInit = () => {
+        new window.google.translate.TranslateElement(
+          {
+            pageLanguage: "ko", // 기본 페이지 언어는 한국어
+            layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
+            autoDisplay: false,
+          },
+          "google_translate_element"
+        );
+      };
+    }
+  }, []);
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -29,8 +54,25 @@ export default function Home() {
 
   return (
     <div style={{ position: "relative", zIndex: 1 }}>
+      
+      {/* 🌐 번역 버튼 영역 (히어로 상단 우측 배치) */}
+      <div 
+        style={{ 
+          display: "flex", 
+          justifyContent: "flex-end", 
+          alignItems: "center", 
+          gap: "10px",
+          padding: "10px 0",
+          position: "relative",
+          zIndex: 100
+        }}
+      >
+        <span style={{ fontSize: "12px", color: "#666", fontWeight: "600" }}>🌐 다국어 번역 / Translation :</span>
+        <div id="google_translate_element" className="translate-box"></div>
+      </div>
+
       {/* 🚀 히어로 영역 */}
-      <div className="hero">
+      <div className="hero" style={{ marginTop: "10px" }}>
         <h1 className="title" style={{ fontSize: "60px", fontWeight: "800" }}>
           Dealounge
         </h1>
@@ -156,7 +198,7 @@ export default function Home() {
                     background: "#000",
                     color: "#fff",
                     borderRadius: "30px",
-                    border: "none", // 버튼 기본 테두리 제거
+                    border: "none",
                     fontSize: "13px",
                     fontWeight: "bold",
                     cursor: "pointer",
